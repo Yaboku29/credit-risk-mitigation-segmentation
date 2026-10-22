@@ -51,3 +51,22 @@ Proyek ini diselesaikan dengan alur kerja *end-to-end* sebagai berikut:
 2. **Feature Engineering:** Normalisasi skala data numerik, *encoding* variabel kategorikal, dan ekstraksi rasio finansial krusial.
 3. **Customer Segmentation (Clustering):** Penerapan algoritma **K-Means / K-Medoids** dibantu oleh *Elbow Method* dan *Silhouette Score* untuk menentukan jumlah segmen perilaku keuangan yang optimal.
 4. **Risk Predictive Modeling (Classification):** Melatih algoritma klasifikasi seperti **XGBoost / Random Forest** pada tiap segmen untuk memprediksi risiko gagal bayar dengan fokus metrik optimasi pada **Recall** dan **ROC-AUC**.
+
+---
+
+## 🚀 4. Cara Menjalankan Proyek
+
+1. **Clone Repositori & Persiapan Environment:**
+   ```bash
+   git clone <URL_REPOSITORI>
+   cd <NAMA_FOLDER>
+   ```
+
+2. **Pengaturan Environment File:**
+   Pastikan file `.env` sudah dikonfigurasi jika terdapat kredensial atau parameter jalur data tertentu.
+
+3. **Menjalankan Jupyter Notebook:**
+   Buka dan jalankan alur analisis serta eksperimen pada file notebook:
+   ```bash
+   jupyter notebook test.ipynb
+   ```
