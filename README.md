@@ -2,6 +2,12 @@
 
 **Tech Stack & Domain:** <code>Python 3.9+</code> | <code>Fintech / Credit Risk</code> | <code>Clustering & Classification</code>
 
+Anggota:
+1. Ananda Rizky Setya Nugroho   (123240070)
+2. Fahmi Firdaus                (123240055)
+3. Nailah Hana Nur'aisyah       (123240088)
+4. Muhamad Ifsal Fadhillah      (123240138)
+
 ## 📌 1. Latar Belakang & Tujuan
 Kredit macet (*Non-Performing Loan*) merupakan salah satu risiko terbesar dalam industri keuangan dan *fintech lending*. Menggunakan pendekatan satu kebijakan untuk semua pelanggan (*one-size-fits-all*) sering kali tidak efektif dan bisa mengurangi potensi profit bisnis.
 
