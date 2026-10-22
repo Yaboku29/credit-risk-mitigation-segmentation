@@ -8,6 +8,21 @@ Anggota:
 3. Nailah Hana Nur'aisyah       (123240088)
 4. Muhamad Ifsal Fadhillah      (123240138)
 
+---
+
+## 📁 Struktur Repositori
+
+```text
+.
+├── data/               # Folder penyimpanan dataset
+|    ├── data.csv
+├── .env                # File konfigurasi environment variabel
+├── README.md           # Dokumentasi proyek
+└── test.ipynb          # Notebook eksplorasi data, eksperimen model, & segmentasi
+```
+
+---
+
 ## 📌 1. Latar Belakang & Tujuan
 Kredit macet (*Non-Performing Loan*) merupakan salah satu risiko terbesar dalam industri keuangan dan *fintech lending*. Menggunakan pendekatan satu kebijakan untuk semua pelanggan (*one-size-fits-all*) sering kali tidak efektif dan bisa mengurangi potensi profit bisnis.
 
