@@ -2,15 +2,18 @@
 
 **Tech Stack & Domain:** <code>Python 3.9+</code> | <code>Fintech / Credit Risk</code> | <code>Clustering & Classification</code>
 
-Anggota:
-1. Ananda Rizky Setya Nugroho   (123240070)
-2. Fahmi Firdaus                (123240055)
-3. Nailah Hana Nur'aisyah       (123240088)
-4. Muhamad Ifsal Fadhillah      (123240138)
+### Anggota Tim
+
+| No | Nama | NIM |
+| :---: | :--- | :---: |
+| 1 | **Ananda Rizky Setya Nugroho** | `123240070` |
+| 2 | **Fahmi Firdaus** | `123240055` |
+| 3 | **Nailah Hana Nur'aisyah** | `123240088` |
+| 4 | **Muhamad Ifsal Fadhillah** | `123240138` |
 
 ---
 
-## 📁 Struktur Repositori
+## Struktur Repositori
 
 ```text
 .
@@ -23,7 +26,7 @@ Anggota:
 
 ---
 
-## 📌 1. Latar Belakang & Tujuan
+## 1. Latar Belakang & Tujuan
 Kredit macet (*Non-Performing Loan*) merupakan salah satu risiko terbesar dalam industri keuangan dan *fintech lending*. Menggunakan pendekatan satu kebijakan untuk semua pelanggan (*one-size-fits-all*) sering kali tidak efektif dan bisa mengurangi potensi profit bisnis.
 
 Proyek ini bertujuan untuk **memitigasi risiko kredit macet** dengan pendekatan dua tahap:
@@ -34,7 +37,7 @@ Dengan hasil ini, tim manajemen risiko dapat menerapkan strategi intervensi dan 
 
 ---
 
-## 📊 2. Struktur Dataset & Fitur
+## 2. Struktur Dataset & Fitur
 Dataset yang digunakan mencakup informasi detail mengenai profil keuangan dan demografi pelanggan yang mengajukan pinjaman:
 
 * **Fitur Demografi:** Usia, pendapatan bulanan, status pernikahan, status kepemilikan rumah, dan jenis pekerjaan.
@@ -44,7 +47,7 @@ Dataset yang digunakan mencakup informasi detail mengenai profil keuangan dan de
 
 ---
 
-## 🛠️ 3. Metodologi & Alur Kerja
+## 3. Metodologi & Alur Kerja
 Proyek ini diselesaikan dengan alur kerja *end-to-end* sebagai berikut:
 
 1. **Exploratory Data Analysis (EDA):** Analisis distribusi data, penanganan data hilang (*missing values*), analisis korelasi, dan deteksi *outliers*.
@@ -54,7 +57,7 @@ Proyek ini diselesaikan dengan alur kerja *end-to-end* sebagai berikut:
 
 ---
 
-## 🚀 4. Cara Menjalankan Proyek
+## 4. Cara Menjalankan Proyek
 
 1. **Clone Repositori & Persiapan Environment:**
    ```bash
