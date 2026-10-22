@@ -1,8 +1,6 @@
 # Strategi Penurunan Risiko Kredit Macet Berdasarkan Segmentasi Perilaku Finansial Pelanggan
 
-![Python](https://shields.io)
-![Data Science](https://shields.io)
-![Machine Learning](https://shields.io)
+**Tech Stack & Domain:** <code>Python 3.9+</code> | <code>Fintech / Credit Risk</code> | <code>Clustering & Classification</code>
 
 ## 📌 1. Latar Belakang & Tujuan
 Kredit macet (*Non-Performing Loan*) merupakan salah satu risiko terbesar dalam industri keuangan dan *fintech lending*. Menggunakan pendekatan satu kebijakan untuk semua pelanggan (*one-size-fits-all*) sering kali tidak efektif dan bisa mengurangi potensi profit bisnis.
