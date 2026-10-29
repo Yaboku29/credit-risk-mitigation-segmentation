@@ -4,12 +4,12 @@
 
 ### Anggota Tim
 
-| No | Nama | NIM |
-| :---: | :--- | :---: |
+| No | Nama | NIM | USN GitHub |
+| :---: | :--- | :---: | :---: |
 | 1 | **Ananda Rizky Setya Nugroho** | `123240070` |
 | 2 | **Fahmi Firdaus** | `123240055` |
 | 3 | **Nailah Hana Nur'aisyah** | `123240088` |
-| 4 | **Muhamad Ifsal Fadhillah** | `123240138` |
+| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya|
 
 ---
 
