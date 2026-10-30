@@ -19,7 +19,6 @@
 .
 ├── data/               # Folder penyimpanan dataset
 |    ├── data.csv
-├── .env                # File konfigurasi environment variabel
 ├── README.md           # Dokumentasi proyek
 └── test.ipynb          # Notebook eksplorasi data, eksperimen model, & segmentasi
 ```
