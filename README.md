@@ -2,14 +2,14 @@
 
 **Tech Stack & Domain:** <code>Python 3.9+</code> | <code>Fintech / Credit Risk</code> | <code>Clustering & Classification</code>
 
-### Anggota Tim
+### Anggota Tim (Data Science IF-A)
 
-| No | Nama | NIM | USN GitHub |
-| :---: | :--- | :---: | :---: |
-| 1 | **Ananda Rizky Setya Nugroho** | `123240070` |
-| 2 | **Fahmi Firdaus** | `123240055` |
-| 3 | **Nailah Hana Nur'aisyah** | `123240088` |
-| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya|
+| No | Nama | NIM | USN GitHub |Kelas Praktikum|
+| :---: | :--- | :---: | :---: |:---:|
+| 1 | **Ananda Rizky Setya Nugroho** | `123240070` | Yaboku29|IF-B|
+| 2 | **Fahmi Firdaus** | `123240055` |FahmiFirdaus7|IF-F|
+| 3 | **Nailah Hana Nur'aisyah** | `123240088` |nailahhana|IF-A|
+| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya|IF_F|
 
 ---
 
