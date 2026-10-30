@@ -9,7 +9,7 @@
 | 1 | **Ananda Rizky Setya Nugroho** | `123240070` | Yaboku29|IF-B|
 | 2 | **Fahmi Firdaus** | `123240055` |FahmiFirdaus7|IF-F|
 | 3 | **Nailah Hana Nur'aisyah** | `123240088` |nailahhana|IF-A|
-| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya|IF_F|
+| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya|IF-F|
 
 ---
 
