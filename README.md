@@ -72,3 +72,60 @@ Proyek ini diselesaikan dengan alur kerja *end-to-end* sebagai berikut:
    ```bash
    jupyter notebook test.ipynb
    ```
+## 5. Data Cleaning
+Pada tahap data cleanning, terjadi perubahan sebagai berikut:
+
+1. **Hapus `id_pelanggan`** — hanya pengenal unik, tidak membawa informasi prediktif dan berisiko membuat model menghafal baris.
+2. **Rapikan teks kategorikal** — membuang spasi berlebih agar kategori yang sama tidak terhitung sebagai dua nilai berbeda.
+3. **Validasi nilai tidak valid** — nilai negatif, usia tidak wajar, skor kredit di luar rentang, `lama_bekerja_tahun` yang tidak masuk akal terhadap usia, serta kolom biner/target yang bernilai selain 0 dan 1.
+4. **Cek duplikasi ulang** — pengecekan sebelumnya menyertakan `id_pelanggan` yang unik, sehingga duplikat isi data tidak akan terdeteksi. Pengecekan diulang setelah kolom ID dibuang.
+
+---
+
+## 6. Data Pre-processing
+Pada tahap data Pre-processing, dilakukan proses sebagai berikut:
+
+1. **Train-test split** 80:20 dengan `stratify` pada target agar proporsi Lancar/Macet tetap sama.
+2. **Penanganan outlier (capping/winsorizing)** dengan batas IQR dari data latih. Capping dipilih daripada menghapus baris karena pendapatan, tabungan, dan hutang yang ekstrem pada data kredit bisa saja valid, dan membuang baris akan mengurangi data nasabah berisiko.
+3. **Encoding** kategorikal (`status_pekerjaan`, `tipe_produk`, `tujuan_pinjaman`) dengan One-Hot Encoding, sesuai temuan pada EDA.
+4. **Scaling** fitur numerik kontinu dengan `StandardScaler`. Kolom biner tidak di-scale.
+
+---
+
+## 7. Feature Selection
+Seleksi fitur dilakukan hanya pada **data latih** dengan tiga tahap:
+
+1. **Multikolinearitas** — dari setiap pasangan fitur dengan |korelasi| di atas ambang batas, fitur yang korelasinya terhadap target lebih lemah dibuang. Dari EDA, `rasio_pinjaman_terhadap_pendapatan` dan `rasio_pembayaran_terhadap_pendapatan` memiliki korelasi terhadap target yang hampir identik, sehingga patut dicurigai redundan.
+2. **Voting tiga metode** — *Mutual Information* (filter, menangkap hubungan non-linear), *Random Forest importance* (embedded), dan *RFE dengan Logistic Regression* (wrapper). Setiap metode memilih `K` fitur teratas.
+3. **Keputusan akhir** — fitur dipertahankan jika dipilih oleh minimal 2 dari 3 metode.
+
+Fitur terpilih (15):
+  + skor_kredit
+  + rasio_hutang_terhadap_pendapatan
+  + lama_riwayat_kredit_tahun
+  + suku_bunga
+  + rasio_pembayaran_terhadap_pendapatan
+  + gagal_bayar_tercatat
+  + tunggakan_2thn_terakhir
+  + usia
+  + lama_bekerja_tahun
+  + pendapatan_tahunan
+  + aset_tabungan
+  + tujuan_pinjaman_Pendidikan
+  + tujuan_pinjaman_Konsolidasi Hutang
+  + catatan_negatif
+  + tipe_produk_Pinjaman Pribadi
+
+Fitur dibuang (9):
+  - hutang_saat_ini
+  - jumlah_pinjaman
+  - rasio_pinjaman_terhadap_pendapatan
+  - status_pekerjaan_Mahasiswa
+  - status_pekerjaan_Wiraswasta
+  - tipe_produk_Kredit Berjalan
+  - tujuan_pinjaman_Medis
+  - tujuan_pinjaman_Pribadi
+  - tujuan_pinjaman_Renovasi Rumah
+
+Ukuran akhir: (39296, 15) (9825, 15)
+---
