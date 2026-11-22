@@ -22,7 +22,7 @@
 │   ├── data_dashboard.csv              # Data hasil pemodelan yang otomatis diekspor saat notebook di-run all
 │   └── requirements.txt                # Dependensi library untuk dashboard
 ├── notebook/
-│   └── coba.ipynb                      # Notebook utama proyek Data Science
+│   └── notebook.ipynb                  # Notebook utama proyek Data Science
 ├── data/
 │   └── data.csv                        # Dataset mentah nasabah (50.000 baris, 20 kolom)
 ├── README.md                           # Dokumentasi komprehensif proyek
@@ -76,7 +76,7 @@ Dataset diperoleh dari Kaggle: [Faisal Surya Saputra (2025) - Dataset Klasifikas
 | 17 | `rasio_hutang_terhadap_pendapatan` | Numerik | *Debt-to-Income Ratio* (DTI): rasio total hutang terhadap pendapatan tahunan. |
 | 18 | `rasio_pinjaman_terhadap_pendapatan` | Numerik | *Loan-to-Income Ratio* (LTI): rasio pinjaman yang diajukan terhadap pendapatan. |
 | 19 | `rasio_pembayaran_terhadap_pendapatan` | Numerik | *Payment-to-Income Ratio* (PTI): rasio cicilan terhadap pendapatan tahunan. |
-| 20 | `status_pinjaman` | Biner | Target: `1 = Lancar` (80.0%), `0 = Macet/Default` (20.0%). Dibalik ke `1 = Macet` pada klasifikasi. |
+| 20 | `status_pinjaman` | Biner | Target: `1 = Lancar` (55.0%), `0 = Macet/Default` (45.0%). Dibalik ke `1 = Macet` pada klasifikasi. |
 
 ---
 
@@ -108,19 +108,19 @@ Menggunakan konsensus 3 tahap:
 
 ### 4.1 Segmentasi Nasabah (K-Means Clustering)
 Berdasarkan analisis *Elbow Method* dan *Silhouette Score*, dipilih $K = 3$ segmen:
-* **Cluster 1 (Segmen Rawan / High Risk - 35.1%):** Usia muda (27.9 thn), skor kredit rendah (589.6), suku bunga tinggi (18.4%), riwayat tunggakan tinggi. **Tingkat Macet = 71.26%**.
-* **Cluster 0 (Segmen Menengah / Standar - 34.7%):** Usia dewasa muda (33.0 thn), skor kredit baik (676.5), didominasi pinjaman pribadi. **Tingkat Macet = 34.43%**.
-* **Cluster 2 (Segmen Mapan / Low Risk - 30.2%):** Usia matang (45.7 thn), masa kerja & riwayat kredit panjang (> 14 thn), pendapatan & tabungan tertinggi. **Tingkat Macet = 23.63%**.
+* **Cluster 1 (Segmen Rawan / High Risk - 35.1%):** Usia muda (27.9 thn), skor kredit rendah (589.6), suku bunga tinggi (18.4%), riwayat tunggakan tinggi. **Tingkat Macet = 66.1%**.
+* **Cluster 0 (Segmen Menengah / Standar - 34.7%):** Usia dewasa muda (33.0 thn), skor kredit baik (676.5), didominasi pinjaman pribadi. **Tingkat Macet = 24.8%**.
+* **Cluster 2 (Segmen Mapan - 30.2%):** Usia matang (45.7 thn), masa kerja & riwayat kredit panjang (> 14 thn), pendapatan & tabungan tertinggi. **Tingkat Macet = 26.8%**.
 
 ### 4.2 Hasil Evaluasi Model Klasifikasi Risiko (Data Uji 9.825 Nasabah)
 
 | Model / Segmen | Karakteristik Segmen | n Nasabah Uji | Default Rate Uji | Precision (Macet) | Recall (Macet) | F1-Score | ROC-AUC |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Cluster 0** | Segmen Menengah (Standar) | 3.377 | 0.340 | 0.793 | 0.866 | 0.828 | 0.949 |
-| **Cluster 1** | Segmen Rawan (High Risk) | 3.445 | 0.723 | 0.955 | 0.856 | 0.903 | 0.949 |
-| **Cluster 2** | Segmen Mapan (Low Risk) | 3.003 | 0.232 | 0.740 | 0.889 | 0.808 | 0.969 |
-| **Model Hybrid (Gabungan)** | **Arsitektur Dua Tahap Berbasis Segmen** | **9.825** | **0.441** | **0.867** | **0.864** | **0.865** | **0.954** |
-| Model Tunggal Global | Baseline Pembanding tanpa Segmentasi | 9.825 | 0.441 | 0.884 | 0.884 | 0.884 | 0.962 |
+| **Cluster 0** | Segmen Menengah (Standar) | 3.163 | 0.248 | 0.711 | 0.856 | 0.777 | 0.950 |
+| **Cluster 1** | Segmen Rawan (High Risk) | 4.489 | 0.661 | 0.933 | 0.818 | 0.872 | 0.934 |
+| **Cluster 2** | Segmen Mapan (Low Risk) | 2.173 | 0.268 | 0.796 | 0.882 | 0.836 | 0.969 |
+| **Model Hybrid (Gabungan)** | **Arsitektur Dua Tahap Berbasis Segmen** | **9.825** | **0.441** | **0.862** | **0.833** | **0.848** | **0.947** |
+| Model Tunggal Global | Baseline Pembanding tanpa Segmentasi | 9.825 | 0.441 | 0.871 | 0.870 | 0.870 | 0.957 |
 
 ### 4.3 Pemilihan Model Terbaik
 **Model Hybrid Berbasis Segmen dipilih sebagai solusi terbaik untuk implementasi perbankan/fintech** karena:
@@ -153,7 +153,7 @@ Berdasarkan analisis *Elbow Method* dan *Silhouette Score*, dipilih $K = 3$ segm
    ```
 2. **Jalankan Jupyter Notebook:**
    ```bash
-   jupyter notebook notebook/coba.ipynb
+   jupyter notebook notebook/notebook.ipynb
    ```
    Seluruh tahapan dari eksplorasi, imputasi, pembuatan fitur, clustering, klasifikasi, evaluasi komparatif, hingga konklusi dapat langsung direproduksi secara utuh. **Ketika notebook ini di-*Run All*, data hasil pemodelan dan prediksi otomatis diekspor langsung ke `dashboard/data_dashboard.csv`**.
 
