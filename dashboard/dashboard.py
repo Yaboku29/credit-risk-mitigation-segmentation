@@ -23,34 +23,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS untuk estetika tampilan dashboard perbankan profesional
+# Mengatur styling responsif yang adaptif untuk Light Mode dan Dark Mode
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 26px;
-        font-weight: 700;
-        color: #1E3A8A;
-        margin-bottom: 2px;
-    }
-    .sub-header {
-        font-size: 15px;
-        color: #4B5563;
-        margin-bottom: 18px;
-    }
-    .metric-card {
-        background-color: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 14px;
-        text-align: center;
-    }
-    .policy-box {
-        background-color: #EFF6FF;
-        border-left: 5px solid #2563EB;
-        padding: 12px 16px;
-        border-radius: 6px;
-        margin-top: 10px;
-        margin-bottom: 10px;
+    .block-container {
+        padding-top: 1.8rem;
+        padding-bottom: 2rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -190,8 +168,8 @@ if df_filtered.empty:
 # ==========================================
 # 5. HEADER UTAMA & KPI METRICS
 # ==========================================
-st.markdown('<div class="main-header">Strategi Penurunan Risiko Kredit Macet Berdasarkan Segmentasi Perilaku Finansial</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Dashboard Analisis Interaktif: Segmentasi Nasabah (K-Means) & Prediksi Risiko Gagal Bayar per Segmen (Random Forest / XGBoost)</div>', unsafe_allow_html=True)
+st.title("💳 Strategi Penurunan Risiko Kredit Macet Berdasarkan Segmentasi Perilaku Finansial")
+st.markdown("**Dashboard Analisis Interaktif: Segmentasi Nasabah (K-Means) & Prediksi Risiko Gagal Bayar per Segmen (Random Forest / XGBoost)**")
 
 # Menghitung KPI utama berdasarkan data terfilter
 total_nasabah = len(df_filtered)
@@ -301,7 +279,7 @@ with col_fig3:
 
 with col_fig4:
     fig4, ax4 = plt.subplots(figsize=(7, 4))
-    sns.boxplot(x='cluster_nama', y='skor_kredit', data=df_filtered, palette=['#1f77b4', '#d62728', '#2ca02c'], ax=ax4)
+    sns.boxplot(x='cluster_nama', y='skor_kredit', data=df_filtered, hue='cluster_nama', palette=['#1f77b4', '#d62728', '#2ca02c'], legend=False, ax=ax4)
     ax4.set_title("Distribusi Skor Kredit per Segmen Terfilter", fontsize=11, fontweight='bold')
     ax4.set_xlabel("Segmen")
     ax4.set_ylabel("Skor Kredit (FICO)")
@@ -404,14 +382,12 @@ with sim_col2:
 saved_loss = tp * est_loss_per_default
 leaked_loss = fn * est_loss_per_default
 
-st.markdown(f"""
-<div class="policy-box">
-    <b>💰 Simulasi Dampak Finansial pada Threshold {threshold_slider:.2f}:</b><br>
-    • <b>Potensi Modal Terselamatkan (True Positive = {tp:,} nasabah):</b> Rp {saved_loss:,.0f} berhasil dicegah dari gagal bayar.<br>
-    • <b>Potensi Risiko Kerugian Lolos (False Negative = {fn:,} nasabah):</b> Rp {leaked_loss:,.0f} kredit macet yang lolos pengawasan.<br>
-    • <b>Nasabah Lancar Terkena Pengetatan (False Positive = {fp:,} nasabah):</b> Potensi friksi penolakan/persyaratan ekstra pada nasabah potensial baik.
-</div>
-""", unsafe_allow_html=True)
+st.info(f"""
+### 💰 Simulasi Dampak Finansial pada Threshold {threshold_slider:.2f}:
+* **Potensi Modal Terselamatkan (True Positive = {tp:,} nasabah):** **Rp {saved_loss:,.0f}** berhasil dicegah dari risiko gagal bayar.
+* **Potensi Risiko Kerugian Lolos (False Negative = {fn:,} nasabah):** **Rp {leaked_loss:,.0f}** kredit macet yang lolos pengawasan.
+* **Nasabah Lancar Terkena Pengetatan (False Positive = {fp:,} nasabah):** Potensi friksi penolakan/persyaratan ekstra pada nasabah potensial baik.
+""")
 
 st.markdown("---")
 
