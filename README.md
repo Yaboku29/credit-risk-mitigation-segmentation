@@ -1,15 +1,15 @@
 # Strategi Penurunan Risiko Kredit Macet Berdasarkan Segmentasi Perilaku Finansial Pelanggan
 
-**Tech Stack & Domain:** <code>Python 3.9+</code> | <code>Fintech / Credit Risk</code> | <code>Clustering & Classification</code>
+**Tech Stack & Domain:** <code>Python 3.9+</code> | <code>Fintech / Credit Risk</code> | <code>Clustering & Classification (Two-Stage Hybrid Framework)</code>
 
 ### Anggota Tim (Data Science IF-A)
 
-| No | Nama | NIM | USN GitHub |Kelas Praktikum|
-| :---: | :--- | :---: | :---: |:---:|
-| 1 | **Ananda Rizky Setya Nugroho** | `123240070` | Yaboku29|IF-B|
-| 2 | **Fahmi Firdaus** | `123240055` |FahmiFirdaus7|IF-F|
-| 3 | **Nailah Hana Nur'aisyah** | `123240088` |nailahhana|IF-A|
-| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya|IF-F|
+| No | Nama | NIM | USN GitHub | Kelas Praktikum |
+| :---: | :--- | :---: | :---: | :---:|
+| 1 | **Ananda Rizky Setya Nugroho** | `123240070` | Yaboku29 | IF-B |
+| 2 | **Fahmi Firdaus** | `123240055` | FahmiFirdaus7 | IF-F |
+| 3 | **Nailah Hana Nur'aisyah** | `123240088` | nailahhana | IF-A |
+| 4 | **Muhamad Ifsal Fadhillah** | `123240138` | Mesalllnya | IF-F |
 
 ---
 
@@ -17,158 +17,149 @@
 
 ```text
 .
-├── data/               # Folder penyimpanan dataset
-|    ├── data.csv
-├── README.md           # Dokumentasi proyek
-└── test.ipynb          # Notebook eksplorasi data, eksperimen model, & segmentasi
+├── dashboard/
+│   ├── dashboard.py                    # Script utama aplikasi Streamlit Dashboard
+│   ├── data_dashboard.csv              # Data hasil pemodelan yang otomatis diekspor saat notebook di-run all
+│   └── requirements.txt                # Dependensi library untuk dashboard
+├── notebook/
+│   └── coba.ipynb                      # Notebook utama proyek Data Science
+├── data/
+│   └── data.csv                        # Dataset mentah nasabah (50.000 baris, 20 kolom)
+├── README.md                           # Dokumentasi komprehensif proyek
+└── *.png                               # Visualisasi grafik EDA, clustering, dan evaluasi
 ```
 
 ---
 
-## 1. Latar Belakang & Tujuan
-Kredit macet (*Non-Performing Loan*) merupakan salah satu risiko terbesar dalam industri keuangan dan *fintech lending*. Menggunakan pendekatan satu kebijakan untuk semua pelanggan (*one-size-fits-all*) sering kali tidak efektif dan bisa mengurangi potensi profit bisnis.
+## 1. Business Understanding
 
-Proyek ini bertujuan untuk **memitigasi risiko kredit macet** dengan pendekatan dua tahap:
-1. **Segmentasi Perilaku:** Mengelompokkan nasabah berdasarkan profil demografi dan kebiasaan finansial mereka menggunakan algoritma *Unsupervised Learning*.
-2. **Prediksi Risiko:** Membangun model klasifikasi untuk memprediksi probabilitas gagal bayar (*default*) pada masing-masing segmen nasabah.
+### 1.1 Latar Belakang & Masalah
+Kredit macet (*Non-Performing Loan* / NPL) merupakan ancaman terbesar bagi stabilitas institusi keuangan perbankan maupun *fintech lending*. Kebijakan persetujuan kredit seragam (*one-size-fits-all*) memiliki kelemahan mendasar: terlalu ketat akan menghilangkan peluang bisnis, sedangkan terlalu longgar akan memicu gagal bayar massal. Proyek ini mengimplementasikan sistem mitigasi risiko cerdas berbasis data (*data-driven*) dengan pendekatan dua tahap:
+1. **Segmentasi Perilaku (*Behavioral Segmentation*):** Mengelompokkan nasabah berdasarkan profil demografi dan pola keuangan menggunakan *Unsupervised Learning* (K-Means).
+2. **Prediksi Risiko per Segmen (*Segment-Specific Risk Prediction*):** Melatih model klasifikasi *Supervised Learning* (Random Forest / XGBoost) untuk mengestimasi probabilitas gagal bayar (*default*) pada tiap segmen.
 
-Dengan hasil ini, tim manajemen risiko dapat menerapkan strategi intervensi dan kebijakan limit kredit yang disesuaikan secara spesifik (*personalized risk mitigation*).
+### 1.2 Pertanyaan Bisnis (*Business Questions*)
+1. Karakteristik finansial dan demografi apa yang paling signifikan membedakan nasabah berisiko gagal bayar dengan nasabah lancar?
+2. Bagaimana memetakan dan mengelompokkan nasabah ke dalam segmen perilaku finansial yang homogen, terpisah optimal, dan bermakna secara bisnis?
+3. Apakah pemodelan klasifikasi risiko gagal bayar berbasis segmen (*hybrid approach*) memberikan performa deteksi dan fleksibilitas mitigasi yang lebih baik dibandingkan satu model tunggal global?
+4. Strategi mitigasi risiko, penyesuaian plafon limit kredit, dan kebijakan suku bunga apa yang tepat diterapkan pada masing-masing segmen nasabah?
 
----
-
-## 2. Struktur Dataset & Fitur
-Dataset yang digunakan mencakup informasi detail mengenai profil keuangan dan demografi pelanggan yang mengajukan pinjaman:
-
-* **Fitur Demografi:** Usia, pendapatan bulanan, status pernikahan, status kepemilikan rumah, dan jenis pekerjaan.
-* **Fitur Finansial:** Rasio utang terhadap pendapatan (*Debt-to-Income Ratio*), total pinjaman aktif, nilai tabungan, dan pemanfaatan kartu kredit (*credit utilization rate*).
-* **Riwayat Kredit:** Jumlah keterlambatan pembayaran sebelumnya, durasi riwayat kredit, dan skor kredit historis.
-* **Variabel Target:** `status_pinjaman` (1 = Lancar, 0 = Gagal Bayar/Macet). Pada tahap modelling, label dibalik menjadi `1 = Macet` agar Recall dan *scale_pos_weight* mengacu pada kelas gagal bayar.
-
----
-
-## 3. Metodologi & Alur Kerja
-Proyek ini diselesaikan dengan alur kerja *end-to-end* sebagai berikut:
-
-1. **Exploratory Data Analysis (EDA):** Analisis distribusi data, penanganan data hilang (*missing values*), analisis korelasi, dan deteksi *outliers*.
-2. **Feature Engineering:** Normalisasi skala data numerik, *encoding* variabel kategorikal, dan ekstraksi rasio finansial krusial.
-3. **Customer Segmentation (Clustering):** Penerapan algoritma **K-Means / K-Medoids** dibantu oleh *Elbow Method* dan *Silhouette Score* untuk menentukan jumlah segmen perilaku keuangan yang optimal.
-4. **Risk Predictive Modeling (Classification):** Melatih algoritma klasifikasi seperti **XGBoost / Random Forest** pada tiap segmen untuk memprediksi risiko gagal bayar dengan fokus metrik optimasi pada **Recall** dan **ROC-AUC**.
+### 1.3 Tujuan Bisnis & Metrik Keberhasilan
+* **Target Bisnis:** Menurunkan rasio kredit macet (NPL) minimal 15% dari posisi portofolio kredit berjalan.
+* **Metrik Teknis Klasifikasi:** Diutamakan pada **Recall (Macet)** untuk menekan *False Negative* (nasabah macet lolos), didukung oleh **Precision**, **F1-Score**, dan **ROC-AUC**.
+* **Metrik Teknis Clustering:** **Silhouette Score** dan **Inertia (Elbow Method)**.
 
 ---
 
-## 4. Cara Menjalankan Proyek
+## 2. Struktur Dataset & Kamus Data
 
-1. **Clone Repositori & Persiapan Environment:**
+Dataset diperoleh dari Kaggle: [Faisal Surya Saputra (2025) - Dataset Klasifikasi Status Pinjaman](https://www.kaggle.com/datasets/faisalwp/dataset-klasifikasi-status-pinjaman).
+
+| No | Nama Kolom | Tipe Data | Deskripsi & Makna Bisnis |
+| :---: | :--- | :---: | :--- |
+| 1 | `id_pelanggan` | String | Nomor identifikasi unik nasabah peminjam (*identifier*). |
+| 2 | `usia` | Numerik | Usia nasabah saat pengajuan pinjaman (tahun). |
+| 3 | `status_pekerjaan` | Kategorikal | Status kepegawaian (Bekerja, Mahasiswa, Wiraswasta, Menganggur, dll). |
+| 4 | `lama_bekerja_tahun` | Numerik | Durasi pengalaman kerja nasabah (tahun). |
+| 5 | `pendapatan_tahunan` | Numerik | Total penghasilan kotor tahunan nasabah. |
+| 6 | `skor_kredit` | Numerik | Nilai kelayakan kredit nasabah (skala FICO 300 - 850). |
+| 7 | `lama_riwayat_kredit_tahun` | Numerik | Durasi kepemilikan fasilitas kredit (tahun). |
+| 8 | `aset_tabungan` | Numerik | Nilai saldo simpanan likuid atau aset tabungan nasabah. |
+| 9 | `hutang_saat_ini` | Numerik | Total saldo kewajiban utang aktif yang sedang berjalan. |
+| 10 | `gagal_bayar_tercatat` | Biner | Indikator riwayat pernah gagal bayar sebelumnya (1 = Ya, 0 = Tidak). |
+| 11 | `tunggakan_2thn_terakhir` | Numerik | Frekuensi keterlambatan pembayaran dalam 2 tahun terakhir. |
+| 12 | `catatan_negatif` | Biner | Indikator catatan reputasi keuangan buruk (1 = Ada, 0 = Tidak). |
+| 13 | `tipe_produk` | Kategorikal | Jenis instrumen pembiayaan (Kartu Kredit, Pinjaman Pribadi, Kredit Berjalan). |
+| 14 | `tujuan_pinjaman` | Kategorikal | Keperluan penggunaan pinjaman (Bisnis, Pendidikan, Konsolidasi Hutang, dll). |
+| 15 | `jumlah_pinjaman` | Numerik | Nominal pokok pinjaman yang diajukan. |
+| 16 | `suku_bunga` | Numerik | Tingkat suku bunga tahunan pinjaman (%). |
+| 17 | `rasio_hutang_terhadap_pendapatan` | Numerik | *Debt-to-Income Ratio* (DTI): rasio total hutang terhadap pendapatan tahunan. |
+| 18 | `rasio_pinjaman_terhadap_pendapatan` | Numerik | *Loan-to-Income Ratio* (LTI): rasio pinjaman yang diajukan terhadap pendapatan. |
+| 19 | `rasio_pembayaran_terhadap_pendapatan` | Numerik | *Payment-to-Income Ratio* (PTI): rasio cicilan terhadap pendapatan tahunan. |
+| 20 | `status_pinjaman` | Biner | Target: `1 = Lancar` (80.0%), `0 = Macet/Default` (20.0%). Dibalik ke `1 = Macet` pada klasifikasi. |
+
+---
+
+## 3. Data Cleaning, Feature Engineering & Preprocessing
+
+### 3.1 Data Cleaning & Validasi Domain
+1. **Imputasi Missing Values:** Imputasi `usia` (147 missing) dengan median usia per kelompok status pekerjaan, dan `status_pekerjaan` (153 missing) dengan modus pekerjaan.
+2. **Eliminasi Kolom ID & Whitespace:** Menghapus `id_pelanggan` dan merapikan spasi kategorikal.
+3. **Validasi Aturan Domain Perbankan:** Membuang 879 baris yang melanggar logika (nilai negatif, usia tidak wajar, lama bekerja melebihi usia produktif). Ukuran bersih: **49.121 baris**.
+
+### 3.2 Feature Engineering (Pembuatan Fitur Baru)
+* **`rasio_tabungan_terhadap_pinjaman`:** `aset_tabungan / (jumlah_pinjaman + 1)` mengukur likuiditas penyangga (*safety net/financial cushion*) nasabah.
+* **`beban_finansial_total`:** `rasio_hutang_terhadap_pendapatan + rasio_pinjaman_terhadap_pendapatan` menangkap eksposur total *leverage* kewajiban nasabah terhadap kapasitas penghasilannya.
+
+### 3.3 Outlier Capping & Preprocessing
+* **Train-Test Split:** Pemisahan 80:20 secara stratified pada target untuk menghindari *data leakage*.
+* **Penanganan Outlier (Capping IQR):** Batas kuantil dipelajari HANYA dari data latih, lalu diterapkan pada data latih dan data uji tanpa membuang baris data penting.
+* **Transformasi Skala:** `StandardScaler` untuk numerik kontinu, `OneHotEncoder(drop='first')` untuk kategorikal nominal, dan `passthrough` untuk kolom biner.
+
+### 3.4 Feature Selection
+Menggunakan konsensus 3 tahap:
+1. Penyaringan multikolinearitas ($|r| > 0.85$) yang mengeliminasi `rasio_pinjaman_terhadap_pendapatan` (redundansi dengan rasio cicilan).
+2. Voting 3 metode: Mutual Information, Random Forest Importance, dan RFE Logistic Regression.
+3. Keputusan akhir: Memilih 15 fitur yang memperoleh minimal 2 suara.
+
+---
+
+## 4. Pemodelan & Hasil Evaluasi
+
+### 4.1 Segmentasi Nasabah (K-Means Clustering)
+Berdasarkan analisis *Elbow Method* dan *Silhouette Score*, dipilih $K = 3$ segmen:
+* **Cluster 1 (Segmen Rawan / High Risk - 35.1%):** Usia muda (27.9 thn), skor kredit rendah (589.6), suku bunga tinggi (18.4%), riwayat tunggakan tinggi. **Tingkat Macet = 71.26%**.
+* **Cluster 0 (Segmen Menengah / Standar - 34.7%):** Usia dewasa muda (33.0 thn), skor kredit baik (676.5), didominasi pinjaman pribadi. **Tingkat Macet = 34.43%**.
+* **Cluster 2 (Segmen Mapan / Low Risk - 30.2%):** Usia matang (45.7 thn), masa kerja & riwayat kredit panjang (> 14 thn), pendapatan & tabungan tertinggi. **Tingkat Macet = 23.63%**.
+
+### 4.2 Hasil Evaluasi Model Klasifikasi Risiko (Data Uji 9.825 Nasabah)
+
+| Model / Segmen | Karakteristik Segmen | n Nasabah Uji | Default Rate Uji | Precision (Macet) | Recall (Macet) | F1-Score | ROC-AUC |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Cluster 0** | Segmen Menengah (Standar) | 3.377 | 0.340 | 0.793 | 0.866 | 0.828 | 0.949 |
+| **Cluster 1** | Segmen Rawan (High Risk) | 3.445 | 0.723 | 0.955 | 0.856 | 0.903 | 0.949 |
+| **Cluster 2** | Segmen Mapan (Low Risk) | 3.003 | 0.232 | 0.740 | 0.889 | 0.808 | 0.969 |
+| **Model Hybrid (Gabungan)** | **Arsitektur Dua Tahap Berbasis Segmen** | **9.825** | **0.441** | **0.867** | **0.864** | **0.865** | **0.954** |
+| Model Tunggal Global | Baseline Pembanding tanpa Segmentasi | 9.825 | 0.441 | 0.884 | 0.884 | 0.884 | 0.962 |
+
+### 4.3 Pemilihan Model Terbaik
+**Model Hybrid Berbasis Segmen dipilih sebagai solusi terbaik untuk implementasi perbankan/fintech** karena:
+1. **Fleksibilitas Ambang Batas (*Tailored Thresholding*):** Memungkinkan penerapan threshold ketat (0.35) pada Cluster 1 untuk menjaring > 95% nasabah macet, dan threshold longgar (0.60) pada Cluster 2 guna mempermudah nasabah prima.
+2. **Intervensi Bisnis Nyata (*Actionability*):** Model memberikan pemahaman konteks *mengapa* nasabah berisiko berdasarkan kelompok perilakunya, bukan sekadar skor probabilitas tunggal.
+
+---
+
+## 5. Keputusan Bisnis & Rekomendasi Manajerial
+
+1. **Kebijakan Cluster 1 (High Risk / Rawan):**
+   * Batasi limit pinjaman maksimal hingga maksimal 30% dari pengajuan standar (maksimal Rp 10 - 15 juta).
+   * Terapkan suku bunga berbasis risiko yang lebih tinggi (*risk-based pricing*) dan tenor pinjaman pendek (< 12 bulan).
+   * Wajibkan agunan likuid atau verifikasi penjamin (*guarantor*).
+2. **Kebijakan Cluster 0 (Medium Risk / Menengah):**
+   * Limit proporsional dengan batas rasio cicilan terhadap pendapatan bulanan (PTI < 25%).
+   * Notifikasi otomatis H-3 jatuh tempo dan opsi restrukturisasi tenor bila terjadi kendala pembayaran awal.
+3. **Kebijakan Cluster 2 (Low Risk / Mapan):**
+   * Jalur persetujuan instan (*instant pre-approval*) tanpa proses birokrasi berulang.
+   * Plafon pinjaman maksimal dan insentif diskon bunga kompetitif untuk retensi nasabah bernilai tinggi.
+
+---
+
+## 6. Cara Menjalankan Proyek
+
+1. **Clone Repositori & Masuk Direktori:**
    ```bash
    git clone <URL_REPOSITORI>
-   cd <NAMA_FOLDER>
+   cd credit-risk-mitigation-segmentation
    ```
-
-2. **Pengaturan Environment File:**
-   Pastikan file `.env` sudah dikonfigurasi jika terdapat kredensial atau parameter jalur data tertentu.
-
-3. **Menjalankan Jupyter Notebook:**
-   Buka dan jalankan alur analisis serta eksperimen pada file notebook:
+2. **Jalankan Jupyter Notebook:**
    ```bash
-   jupyter notebook test.ipynb
+   jupyter notebook notebook/coba.ipynb
    ```
-## 5. Data Cleaning
-Pada tahap data cleanning, terjadi perubahan sebagai berikut:
+   Seluruh tahapan dari eksplorasi, imputasi, pembuatan fitur, clustering, klasifikasi, evaluasi komparatif, hingga konklusi dapat langsung direproduksi secara utuh. **Ketika notebook ini di-*Run All*, data hasil pemodelan dan prediksi otomatis diekspor langsung ke `dashboard/data_dashboard.csv`**.
 
-1. **Hapus `id_pelanggan`** — hanya pengenal unik, tidak membawa informasi prediktif dan berisiko membuat model menghafal baris.
-2. **Rapikan teks kategorikal** — membuang spasi berlebih agar kategori yang sama tidak terhitung sebagai dua nilai berbeda.
-3. **Validasi nilai tidak valid** — nilai negatif, usia tidak wajar, skor kredit di luar rentang, `lama_bekerja_tahun` yang tidak masuk akal terhadap usia, serta kolom biner/target yang bernilai selain 0 dan 1.
-4. **Cek duplikasi ulang** — pengecekan sebelumnya menyertakan `id_pelanggan` yang unik, sehingga duplikat isi data tidak akan terdeteksi. Pengecekan diulang setelah kolom ID dibuang.
-
----
-
-## 6. Data Pre-processing
-Pada tahap data Pre-processing, dilakukan proses sebagai berikut:
-
-1. **Train-test split** 80:20 dengan `stratify` pada target agar proporsi Lancar/Macet tetap sama.
-2. **Penanganan outlier (capping/winsorizing)** dengan batas IQR dari data latih. Capping dipilih daripada menghapus baris karena pendapatan, tabungan, dan hutang yang ekstrem pada data kredit bisa saja valid, dan membuang baris akan mengurangi data nasabah berisiko.
-3. **Encoding** kategorikal (`status_pekerjaan`, `tipe_produk`, `tujuan_pinjaman`) dengan One-Hot Encoding, sesuai temuan pada EDA.
-4. **Scaling** fitur numerik kontinu dengan `StandardScaler`. Kolom biner tidak di-scale.
-
----
-
-## 7. Feature Selection
-Seleksi fitur dilakukan hanya pada **data latih** dengan tiga tahap:
-
-1. **Multikolinearitas** — dari setiap pasangan fitur dengan |korelasi| di atas ambang batas, fitur yang korelasinya terhadap target lebih lemah dibuang. Dari EDA, `rasio_pinjaman_terhadap_pendapatan` dan `rasio_pembayaran_terhadap_pendapatan` memiliki korelasi terhadap target yang hampir identik, sehingga patut dicurigai redundan.
-2. **Voting tiga metode** — *Mutual Information* (filter, menangkap hubungan non-linear), *Random Forest importance* (embedded), dan *RFE dengan Logistic Regression* (wrapper). Setiap metode memilih `K` fitur teratas.
-3. **Keputusan akhir** — fitur dipertahankan jika dipilih oleh minimal 2 dari 3 metode.
-
-Fitur terpilih (15):
-  + skor_kredit
-  + rasio_hutang_terhadap_pendapatan
-  + lama_riwayat_kredit_tahun
-  + suku_bunga
-  + rasio_pembayaran_terhadap_pendapatan
-  + gagal_bayar_tercatat
-  + tunggakan_2thn_terakhir
-  + usia
-  + lama_bekerja_tahun
-  + pendapatan_tahunan
-  + aset_tabungan
-  + tujuan_pinjaman_Pendidikan
-  + tujuan_pinjaman_Konsolidasi Hutang
-  + catatan_negatif
-  + tipe_produk_Pinjaman Pribadi
-
-Fitur dibuang (9):
-  - hutang_saat_ini
-  - jumlah_pinjaman
-  - rasio_pinjaman_terhadap_pendapatan
-  - status_pekerjaan_Mahasiswa
-  - status_pekerjaan_Wiraswasta
-  - tipe_produk_Kredit Berjalan
-  - tujuan_pinjaman_Medis
-  - tujuan_pinjaman_Pribadi
-  - tujuan_pinjaman_Renovasi Rumah
-
-Ukuran akhir: (39296, 15) (9825, 15)
----
-
-
-## 8. Modelling
-Tahap modelling dijalankan pada fitur terpilih (15 fitur) dengan pendekatan hybrid dua tahap. Seluruh model hanya dilatih pada **data latih**; data uji hanya dipakai untuk prediksi dan evaluasi.
-
-**Dependensi tambahan:** `scikit-learn`, `xgboost` (`pip install xgboost`). Jika `xgboost` tidak terpasang, notebook otomatis memakai Random Forest (`class_weight='balanced'`).
-
-### 8.1 Customer Segmentation (K-Means)
-1. **Menentukan K** — K-Means dicoba untuk K = 2 sampai 6, dievaluasi dengan *Elbow Method* (inertia) dan *Silhouette Score* (dihitung pada sampel 10.000 baris agar efisien). Secara default K dipilih dari Silhouette tertinggi, dan dapat diganti manual lewat `K_MANUAL` bila interpretasi bisnis menghendaki jumlah segmen lain.
-2. **Fitting & prediksi** — K-Means difit pada `X_train_final`, lalu `predict` dipakai untuk memberi label segmen pada data latih dan data uji.
-3. **Profiling cluster** — rata-rata fitur (satuan asli, sebelum scaling) dan tingkat macet per segmen, ditampilkan dalam tabel dan heatmap sehingga setiap segmen dapat diberi nama dan makna bisnis. Visualisasi PCA 2D dipakai sebagai pelengkap untuk melihat keterpisahan segmen.
-
-### 8.2 Risk Predictive Modeling (Cluster-Specific Models)
-1. **Pembalikan label** — `y_*_risk = (status_pinjaman == 0)`, sehingga `1 = Macet` menjadi *positive class*.
-2. **Satu model per segmen** — XGBoost (`n_estimators=300`, `max_depth=4`, `learning_rate=0.05`, `subsample=0.8`, `colsample_bytree=0.8`) dilatih pada data latih tiap segmen.
-3. **Penanganan imbalance** — `scale_pos_weight = jumlah Lancar / jumlah Macet` dihitung **per segmen**, karena ketimpangan kelas berbeda antar segmen.
-4. **Prediksi** — probabilitas Macet pada data uji tiap segmen diubah menjadi kelas dengan ambang `THRESHOLD` (default 0,5).
-
-### 8.3 Evaluasi
-| Metrik | Cara membaca |
-| :--- | :--- |
-| **Recall (Macet)** | Metrik utama. Persentase nasabah macet yang berhasil terdeteksi; Recall rendah berarti banyak *False Negative* (nasabah macet lolos). |
-| **Precision (Macet)** | Dari yang diprediksi macet, berapa persen yang benar-benar macet; Precision rendah berarti banyak nasabah baik ikut ditolak. |
-| **F1-Score** | Rata-rata harmonik Precision dan Recall. |
-| **ROC-AUC** | Kemampuan membedakan Macet dan Lancar di semua ambang batas (0,5 = acak, 1,0 = sempurna); tidak bergantung pada `THRESHOLD`. |
-| **Confusion Matrix** | Rincian jenis kesalahan per segmen dalam jumlah nasabah. |
-
-Evaluasi dilakukan **per segmen** (Classification Report, ROC-AUC, Confusion Matrix), kemudian **digabung** untuk seluruh data uji dan dibandingkan dengan **satu model tunggal tanpa segmentasi** sebagai pembanding. Menurunkan `THRESHOLD` menaikkan Recall dengan mengorbankan Precision; nilainya disesuaikan dengan toleransi risiko bisnis.
-
-### 8.4 Hasil
-Hasil bergantung pada versi library dan model yang aktif, sehingga isi tabel berikut setelah notebook dijalankan.
-
-| Segmen | Nama Segmen | Jumlah Nasabah Uji | Tingkat Macet | Recall (Macet) | Precision (Macet) | ROC-AUC |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| 0 | _isi_ | _isi_ | _isi_ | _isi_ | _isi_ | _isi_ |
-| 1 | _isi_ | _isi_ | _isi_ | _isi_ | _isi_ | _isi_ |
-| Gabungan | - | _isi_ | _isi_ | _isi_ | _isi_ | _isi_ |
-| Model tunggal | - | _isi_ | _isi_ | _isi_ | _isi_ | _isi_ |
-
-### 8.5 Catatan dan Langkah Lanjutan
-* Hasil berasal dari satu kali split; stabilitas dapat diperiksa dengan *stratified cross-validation* di dalam tiap segmen.
-* Hyperparameter masih berupa nilai awal dan belum dituning (`GridSearchCV` / `RandomizedSearchCV` dengan `scoring='recall'` atau `'roc_auc'`).
-* Untuk nasabah baru, alurnya: `preprocessor` → pilih 15 fitur terpilih → `kmeans.predict` → model segmen yang sesuai.
+3. **Menjalankan Dashboard Interaktif Streamlit:**
+   Untuk membuka dan berinteraksi langsung dengan dashboard mitigasi risiko kredit:
+   ```bash
+   streamlit run dashboard/dashboard.py
+   ```
+   Dashboard menyediakan fitur interaktif manipulasi data langsung (filter klaster segmen nasabah, slider rentang skor kredit FICO, multiselect kategori tujuan pinjaman, slider rasio DTI, serta simulator ambang batas *decision threshold* yang secara realtime mengubah visualisasi Confusion Matrix dan kurva ROC).
