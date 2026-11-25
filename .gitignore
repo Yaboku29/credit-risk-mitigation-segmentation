@@ -1,1 +1,5 @@
 test2.ipynb
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.cache_pipeline/

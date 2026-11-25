@@ -22,11 +22,11 @@
 │   ├── data_dashboard.csv              # Data hasil pemodelan yang otomatis diekspor saat notebook di-run all
 │   └── requirements.txt                # Dependensi library untuk dashboard
 ├── notebook/
-│   └── notebook.ipynb                  # Notebook utama proyek Data Science
+│   ├── notebook.ipynb                  # Notebook utama proyek Data Science
+│   └── *.png                           # Visualisasi grafik EDA, clustering, dan evaluasi
 ├── data/
 │   └── data.csv                        # Dataset mentah nasabah (50.000 baris, 20 kolom)
-├── README.md                           # Dokumentasi komprehensif proyek
-└── *.png                               # Visualisasi grafik EDA, clustering, dan evaluasi
+└── README.md                           # Dokumentasi komprehensif proyek
 ```
 
 ---
@@ -36,7 +36,7 @@
 ### 1.1 Latar Belakang & Masalah
 Kredit macet (*Non-Performing Loan* / NPL) merupakan ancaman terbesar bagi stabilitas institusi keuangan perbankan maupun *fintech lending*. Kebijakan persetujuan kredit seragam (*one-size-fits-all*) memiliki kelemahan mendasar: terlalu ketat akan menghilangkan peluang bisnis, sedangkan terlalu longgar akan memicu gagal bayar massal. Proyek ini mengimplementasikan sistem mitigasi risiko cerdas berbasis data (*data-driven*) dengan pendekatan dua tahap:
 1. **Segmentasi Perilaku (*Behavioral Segmentation*):** Mengelompokkan nasabah berdasarkan profil demografi dan pola keuangan menggunakan *Unsupervised Learning* (K-Means).
-2. **Prediksi Risiko per Segmen (*Segment-Specific Risk Prediction*):** Melatih model klasifikasi *Supervised Learning* (Random Forest / XGBoost) untuk mengestimasi probabilitas gagal bayar (*default*) pada tiap segmen.
+2. **Prediksi Risiko per Segmen (*Segment-Specific Risk Prediction*):** Melatih model klasifikasi *Supervised Learning* (Random Forest) untuk mengestimasi probabilitas gagal bayar (*default*) pada tiap segmen.
 
 ### 1.2 Pertanyaan Bisnis (*Business Questions*)
 1. Karakteristik finansial dan demografi apa yang paling signifikan membedakan nasabah berisiko gagal bayar dengan nasabah lancar?
@@ -85,7 +85,7 @@ Dataset diperoleh dari Kaggle: [Faisal Surya Saputra (2025) - Dataset Klasifikas
 ### 3.1 Data Cleaning & Validasi Domain
 1. **Imputasi Missing Values:** Imputasi `usia` (147 missing) dengan median usia per kelompok status pekerjaan, dan `status_pekerjaan` (153 missing) dengan modus pekerjaan.
 2. **Eliminasi Kolom ID & Whitespace:** Menghapus `id_pelanggan` dan merapikan spasi kategorikal.
-3. **Validasi Aturan Domain Perbankan:** Membuang 879 baris yang melanggar logika (nilai negatif, usia tidak wajar, lama bekerja melebihi usia produktif). Ukuran bersih: **49.121 baris**.
+3. **Validasi Aturan Domain Perbankan:** Membuang 879 baris yang melanggar logika: 869 baris dengan nilai kolom biner/target bukan 0 atau 1, dan 10 baris dengan lama bekerja melebihi usia produktif. Ukuran bersih: **49.121 baris**.
 
 ### 3.2 Feature Engineering (Pembuatan Fitur Baru)
 * **`rasio_tabungan_terhadap_pinjaman`:** `aset_tabungan / (jumlah_pinjaman + 1)` mengukur likuiditas penyangga (*safety net/financial cushion*) nasabah.
@@ -100,47 +100,78 @@ Dataset diperoleh dari Kaggle: [Faisal Surya Saputra (2025) - Dataset Klasifikas
 Menggunakan konsensus 3 tahap:
 1. Penyaringan multikolinearitas ($|r| > 0.85$) yang mengeliminasi `rasio_pinjaman_terhadap_pendapatan` (redundansi dengan rasio cicilan).
 2. Voting 3 metode: Mutual Information, Random Forest Importance, dan RFE Logistic Regression.
-3. Keputusan akhir: Memilih 15 fitur yang memperoleh minimal 2 suara.
+3. Keputusan akhir: Memilih 14 fitur yang memperoleh minimal 2 suara.
 
 ---
 
 ## 4. Pemodelan & Hasil Evaluasi
 
+> Backend model dikunci ke Random Forest. Metrik dapat bergeser sekitar 1 poin persentase bila notebook dijalankan dengan versi `scikit-learn` berbeda.
+
 ### 4.1 Segmentasi Nasabah (K-Means Clustering)
-Berdasarkan analisis *Elbow Method* dan *Silhouette Score*, dipilih $K = 3$ segmen:
-* **Cluster 1 (Segmen Rawan / High Risk - 35.1%):** Usia muda (27.9 thn), skor kredit rendah (589.6), suku bunga tinggi (18.4%), riwayat tunggakan tinggi. **Tingkat Macet = 66.1%**.
-* **Cluster 0 (Segmen Menengah / Standar - 34.7%):** Usia dewasa muda (33.0 thn), skor kredit baik (676.5), didominasi pinjaman pribadi. **Tingkat Macet = 24.8%**.
-* **Cluster 2 (Segmen Mapan - 30.2%):** Usia matang (45.7 thn), masa kerja & riwayat kredit panjang (> 14 thn), pendapatan & tabungan tertinggi. **Tingkat Macet = 26.8%**.
+Berdasarkan *Elbow Method* dan *Silhouette Score* dipilih $K = 3$ segmen. Silhouette K=3 hanya 0.151 (K=2: 0.196), sehingga struktur klaster lemah dan segmen saling tumpang tindih; K=3 dipilih karena kebermaknaan bisnis.
 
-### 4.2 Hasil Evaluasi Model Klasifikasi Risiko (Data Uji 9.825 Nasabah)
+| Segmen | % Nasabah Latih | Tingkat Macet (Latih / Uji) | Usia | Skor Kredit | Suku Bunga | Riwayat Kredit | Aset Tabungan |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Cluster 1 (Rawan / High Risk)** | 45.7% | **64.8% / 66.1%** | 26.8 | 610.8 | 16.9% | 3.7 thn | 484 |
+| **Cluster 0 (Menengah / Standar)** | 31.8% | 26.7% / 24.8% | 42.1 | 683.0 | 13.5% | 10.3 thn | 970 |
+| **Cluster 2 (Mapan)** | 22.5% | 26.8% / 26.8% | 41.9 | 660.1 | 15.2% | 14.4 thn | 4.515 |
 
-| Model / Segmen | Karakteristik Segmen | n Nasabah Uji | Default Rate Uji | Precision (Macet) | Recall (Macet) | F1-Score | ROC-AUC |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Cluster 0** | Segmen Menengah (Standar) | 3.163 | 0.248 | 0.711 | 0.856 | 0.777 | 0.950 |
-| **Cluster 1** | Segmen Rawan (High Risk) | 4.489 | 0.661 | 0.933 | 0.818 | 0.872 | 0.934 |
-| **Cluster 2** | Segmen Mapan (Low Risk) | 2.173 | 0.268 | 0.796 | 0.882 | 0.836 | 0.969 |
-| **Model Hybrid (Gabungan)** | **Arsitektur Dua Tahap Berbasis Segmen** | **9.825** | **0.441** | **0.862** | **0.833** | **0.848** | **0.947** |
-| Model Tunggal Global | Baseline Pembanding tanpa Segmentasi | 9.825 | 0.441 | 0.871 | 0.870 | 0.870 | 0.957 |
+Cluster 0 dan Cluster 2 memiliki risiko yang setara (sekitar 2.4 kali lebih rendah dari Cluster 1); keduanya berbeda pada profil (Cluster 2 lebih kaya aset dan berpengalaman kredit), bukan pada tingkat risiko.
 
-### 4.3 Pemilihan Model Terbaik
-**Model Hybrid Berbasis Segmen dipilih sebagai solusi terbaik untuk implementasi perbankan/fintech** karena:
-1. **Fleksibilitas Ambang Batas (*Tailored Thresholding*):** Memungkinkan penerapan threshold ketat (0.35) pada Cluster 1 untuk menjaring > 95% nasabah macet, dan threshold longgar (0.60) pada Cluster 2 guna mempermudah nasabah prima.
-2. **Intervensi Bisnis Nyata (*Actionability*):** Model memberikan pemahaman konteks *mengapa* nasabah berisiko berdasarkan kelompok perilakunya, bukan sekadar skor probabilitas tunggal.
+### 4.2 Hasil Evaluasi Model Klasifikasi Risiko (Data Uji 9.825 Nasabah, threshold 0.50)
+
+| Model / Segmen | n Nasabah Uji | Default Rate Uji | Precision (Macet) | Recall (Macet) | F1-Score | ROC-AUC |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Cluster 0** | 3.163 | 0.248 | 0.704 | 0.862 | 0.775 | 0.951 |
+| **Cluster 1** | 4.489 | 0.661 | 0.938 | 0.811 | 0.870 | 0.934 |
+| **Cluster 2** | 2.173 | 0.268 | 0.793 | 0.889 | 0.838 | 0.971 |
+| **Model Hybrid (Gabungan)** | 9.825 | 0.441 | 0.862 | 0.831 | 0.846 | 0.946 |
+| Model Tunggal Global | 9.825 | 0.441 | 0.871 | 0.872 | 0.871 | 0.957 |
+
+### 4.3 Optimasi Model (Notebook Bab 8)
+Hyperparameter dioptimasi dengan `RandomizedSearchCV` (10 kombinasi, 3-fold CV, skor ROC-AUC) dan threshold dikalibrasi dari prediksi *out-of-fold* data latih dengan **asumsi** biaya False Negative = 3 x False Positive. Data uji hanya dipakai untuk evaluasi akhir.
+
+| Skenario (data uji) | Precision | Recall | F1 | ROC-AUC | Biaya / 1.000 nasabah |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Hybrid awal (thr 0.50) | 0.862 | 0.831 | 0.846 | 0.946 | 282.7 |
+| Hybrid tuning (thr 0.50) | 0.868 | 0.849 | 0.858 | 0.952 | 257.1 |
+| Hybrid tuning + threshold per cluster (C0 0.45, C1 0.23, C2 0.39) | 0.786 | 0.945 | 0.858 | 0.952 | 186.5 |
+| Global awal (thr 0.50) | 0.871 | 0.872 | 0.871 | 0.957 | 227.3 |
+| Global tuning (thr 0.50) | 0.872 | 0.884 | 0.878 | 0.962 | 211.3 |
+| Global tuning + threshold tunggal (0.33) | 0.801 | 0.943 | 0.866 | 0.962 | 179.2 |
+
+Temuan utama:
+* Tuning hyperparameter hanya menaikkan ROC-AUC CV sekitar +0.004 sampai +0.006; kalibrasi threshold berdampak jauh lebih besar.
+* Threshold 0.35 pada Cluster 1 menghasilkan Recall 91.4% (bukan > 95%); Recall 96.1% tercapai pada threshold sekitar 0.23 (Precision 83.1%).
+* Melonggarkan Cluster 2 ke threshold 0.60 menurunkan Recall menjadi 83.4% dan menaikkan biaya; tidak disarankan.
+* Threshold optimal sangat bergantung pada asumsi rasio biaya (lihat tabel sensitivitas di notebook).
+
+### 4.4 Pemilihan Model
+Dari sisi akurasi prediksi murni, **Model Global setara atau sedikit lebih baik** daripada Model Hybrid, baik pada konfigurasi awal maupun setelah optimasi. Model Hybrid dipertahankan sebagai kerangka mitigasi karena:
+1. **Interpretabilitas:** segmen menjelaskan *mengapa* nasabah berisiko.
+2. **Kebijakan terdiferensiasi:** limit, bunga, dan tenor per segmen membutuhkan pengelompokan.
+3. **Threshold khusus Cluster 1:** manfaat kalibrasi threshold terpusat pada segmen ini.
+
+Alternatif praktis: Model Global untuk skoring risiko dan K-Means hanya untuk menentukan kebijakan per segmen.
 
 ---
 
 ## 5. Keputusan Bisnis & Rekomendasi Manajerial
 
 1. **Kebijakan Cluster 1 (High Risk / Rawan):**
-   * Batasi limit pinjaman maksimal hingga maksimal 30% dari pengajuan standar (maksimal Rp 10 - 15 juta).
-   * Terapkan suku bunga berbasis risiko yang lebih tinggi (*risk-based pricing*) dan tenor pinjaman pendek (< 12 bulan).
+   * Batasi limit pinjaman maksimal hingga 30% dari pengajuan standar (maksimal Rp 10 - 15 juta).
+   * Turunkan threshold probabilitas macet menjadi sekitar 0.23 (Recall sekitar 96%, asumsi FN = 3 x FP).
+   * Terapkan suku bunga berbasis risiko (*risk-based pricing*) dan tenor pendek (< 12 bulan).
    * Wajibkan agunan likuid atau verifikasi penjamin (*guarantor*).
-2. **Kebijakan Cluster 0 (Medium Risk / Menengah):**
+2. **Kebijakan Cluster 0 (Menengah):**
    * Limit proporsional dengan batas rasio cicilan terhadap pendapatan bulanan (PTI < 25%).
    * Notifikasi otomatis H-3 jatuh tempo dan opsi restrukturisasi tenor bila terjadi kendala pembayaran awal.
-3. **Kebijakan Cluster 2 (Low Risk / Mapan):**
-   * Jalur persetujuan instan (*instant pre-approval*) tanpa proses birokrasi berulang.
-   * Plafon pinjaman maksimal dan insentif diskon bunga kompetitif untuk retensi nasabah bernilai tinggi.
+   * Pertahankan threshold sekitar 0.50.
+3. **Kebijakan Cluster 2 (Mapan):**
+   * Persetujuan instan hanya untuk nasabah dengan probabilitas macet rendah (mis. < 0.20), bukan seluruh segmen (tingkat macet segmen 26.8%).
+   * Jangan melonggarkan threshold ke 0.60.
+   * Plafon lebih tinggi dan insentif bunga untuk nasabah berskor probabilitas rendah sebagai strategi retensi.
 
 ---
 
@@ -155,7 +186,7 @@ Berdasarkan analisis *Elbow Method* dan *Silhouette Score*, dipilih $K = 3$ segm
    ```bash
    jupyter notebook notebook/notebook.ipynb
    ```
-   Seluruh tahapan dari eksplorasi, imputasi, pembuatan fitur, clustering, klasifikasi, evaluasi komparatif, hingga konklusi dapat langsung direproduksi secara utuh. **Ketika notebook ini di-*Run All*, data hasil pemodelan dan prediksi otomatis diekspor langsung ke `dashboard/data_dashboard.csv`**.
+   Seluruh tahapan dari eksplorasi, imputasi, pembuatan fitur, clustering, klasifikasi, evaluasi komparatif, konklusi, hingga optimasi model (Bab 8) dapat langsung direproduksi secara utuh. **Ketika notebook ini di-*Run All*, data hasil pemodelan dan prediksi otomatis diekspor langsung ke `dashboard/data_dashboard.csv`**.
 
 3. **Menjalankan Dashboard Interaktif Streamlit:**
    Untuk membuka dan berinteraksi langsung dengan dashboard mitigasi risiko kredit:

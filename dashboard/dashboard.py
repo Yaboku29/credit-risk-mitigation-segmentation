@@ -169,7 +169,7 @@ if df_filtered.empty:
 # 5. HEADER UTAMA & KPI METRICS
 # ==========================================
 st.title("💳 Strategi Penurunan Risiko Kredit Macet Berdasarkan Segmentasi Perilaku Finansial")
-st.markdown("**Dashboard Analisis Interaktif: Segmentasi Nasabah (K-Means) & Prediksi Risiko Gagal Bayar per Segmen (Random Forest / XGBoost)**")
+st.markdown("**Dashboard Analisis Interaktif: Segmentasi Nasabah (K-Means) & Prediksi Risiko Gagal Bayar per Segmen (Random Forest)**")
 
 # Menghitung KPI utama berdasarkan data terfilter
 total_nasabah = len(df_filtered)
@@ -309,8 +309,8 @@ with sim_col1:
         min_value=0.10,
         max_value=0.90,
         value=0.50,
-        step=0.05,
-        help="Default terbaik adalah 0.50. Untuk segmen berisiko tinggi (Cluster 1), disarankan menurunkan threshold ke 0.35 guna memaksimalkan penangkapan nasabah gagal bayar."
+        step=0.01,
+        help="Default bawaan adalah 0.50. Berdasarkan optimasi Bab 8 (asumsi FN = 3x FP), threshold optimal adalah 0.23 untuk Cluster 1 (High Risk), 0.45 untuk Cluster 0, dan 0.39 untuk Cluster 2."
     )
     
     st.info(f"""
@@ -401,29 +401,29 @@ tab1, tab2, tab3 = st.tabs(["🔴 Kebijakan Cluster 1 (High Risk)", "🔵 Kebija
 
 with tab1:
     st.markdown("""
-    **Profil: Segmen Rawan / High Risk (Tingkat Gagal Bayar ~71.3%)**
-    * **Plafon Kredit Maksimal:** Batasi pinjaman baru maksimal 30% dari pengajuan standar (maksimal Rp 10.000.000 - Rp 15.000.000).
-    * **Rekomendasi Ambang Batas (*Tailored Threshold*):** Turunkan threshold ke **0.35** agar Recall deteksi macet melonjak hingga > 95%.
-    * **Suku Bunga & Tenor:** Terapkan *risk-based pricing* dengan suku bunga premi risiko lebih tinggi dan tenor pendek (6 - 12 bulan).
+    **Profil: Segmen Rawan / High Risk (Tingkat Gagal Bayar 64.8% Latih / 66.1% Uji)**
+    * **Plafon Kredit Maksimal:** Batasi pinjaman baru maksimal 30% dari pengajuan standar (maksimal Rp 10.000.000 - Rp 15.000.000 atau rasio LTI < 0.20).
+    * **Rekomendasi Ambang Batas (*Tailored Threshold*):** Turunkan threshold dari 0.50 menjadi sekitar **0.23** (asumsi FN = 3x FP) untuk mencapai Recall **96.1%** dengan Precision **83.1%** pada data uji (threshold 0.35 hanya mencapai Recall 91.4%).
+    * **Suku Bunga & Tenor:** Terapkan *risk-based pricing* dengan suku bunga premi risiko lebih tinggi dan tenor pendek (< 12 bulan).
     * **Persyaratan Wajib:** Wajibkan agunan likuid atau verifikasi penjamin (*guarantor*).
     """)
 
 with tab2:
     st.markdown("""
-    **Profil: Segmen Menengah / Peminjam Standar (Tingkat Gagal Bayar ~34.4%)**
+    **Profil: Segmen Menengah / Peminjam Standar (Tingkat Gagal Bayar 26.7% Latih / 24.8% Uji)**
     * **Limit Pinjaman Proporsional:** Batasi rasio cicilan terhadap pendapatan bulanan (Payment-to-Income / PTI < 25%).
-    * **Rekomendasi Ambang Batas:** Gunakan threshold standar **0.50**.
+    * **Rekomendasi Ambang Batas:** Pertahankan threshold sekitar **0.50** (threshold validasi 0.45 praktis setara pada data uji).
     * **Sistem Peringatan Dini:** Aktifkan notifikasi otomatis penagihan H-3 sebelum tanggal jatuh tempo angsuran.
     * **Restrukturisasi:** Sediakan fasilitas perpanjangan tenor apabila terjadi indikasi penurunan arus kas pertama kali.
     """)
 
 with tab3:
     st.markdown("""
-    **Profil: Segmen Mapan / Low Risk (Tingkat Gagal Bayar ~23.6%)**
-    * **Persetujuan Instan (*Instant Pre-Approval*):** Berikan fasilitas persetujuan cepat tanpa verifikasi tatap muka yang berbelit-belit.
-    * **Rekomendasi Ambang Batas:** Naikkan threshold ke **0.60** untuk meminimalkan friksi penolakan nasabah prima.
-    * **Insentif Suku Bunga:** Tawarkan diskon suku bunga preferensial (bunga kompetitif 8 - 10%) untuk mempertahankan loyalitas.
-    * **Penjualan Silang (*Cross-Selling*):** Tawarkan produk premium seperti kartu kredit platinum dan fasilitas pembiayaan investasi.
+    **Profil: Segmen Mapan (Tingkat Gagal Bayar 26.8% Latih & Uji — setara Cluster 0, unggul di aset & riwayat kredit)**
+    * **Persetujuan Instan Selektif:** Jalur persetujuan cepat hanya diberikan kepada nasabah dengan probabilitas macet rendah menurut model (< 0.20), **bukan untuk seluruh segmen**.
+    * **Rekomendasi Ambang Batas:** **Jangan melonggarkan threshold ke 0.60** (menurunkan Recall menjadi 83.4% dan menaikkan biaya kesalahan). Pertahankan threshold di kisaran **0.39 - 0.50**.
+    * **Insentif Suku Bunga & Plafon:** Tawarkan plafon lebih tinggi dan bunga kompetitif (8 - 10%) khusus bagi nasabah berskor probabilitas macet rendah untuk strategi retensi.
+    * **Penjualan Silang (*Cross-Selling*):** Tawarkan produk premium seperti kartu kredit platinum dan fasilitas pembiayaan investasi bagi nasabah yang lolos kriteria risiko rendah.
     """)
 
 st.caption("Dashboard Proyek Data Science: Strategi Penurunan Risiko Kredit Macet Berdasarkan Segmentasi Perilaku Finansial Pelanggan © 2026")
